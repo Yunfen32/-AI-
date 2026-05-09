@@ -6,3 +6,6 @@ python-dotenv>=1.0.0
 pillow>=10.0.0
 pyttsx3>=2.90
 redis>=4.5.0
+flask>=3.0.0
+flask-cors>=4.0.0
+Pillow>=10.0.0

@@ -1,7 +1,6 @@
 import customtkinter as ctk
 import sys
 import os
-from PIL import Image, ImageTk
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
@@ -23,6 +22,7 @@ class LifeMonsterApp:
         try:
             logo_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets", "logo", "logo.png")
             if os.path.exists(logo_path):
+                from PIL import Image, ImageTk
                 logo_image = Image.open(logo_path)
                 logo_image = logo_image.resize((256, 256), Image.Resampling.LANCZOS)
                 self.icon_photo = ImageTk.PhotoImage(logo_image)

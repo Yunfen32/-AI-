@@ -63,6 +63,9 @@ config/secrets.py
 config/ai_config.py
 config/mysql_config.py
 
+# Agent scratch files
+.scratch/
+
 # Testing
 .coverage
 .pytest_cache/
@@ -71,3 +74,7 @@ htmlcov/
 
 # MySQL
 mysql_data/
+# Environment
+.env
+*.pyc
+__pycache__/

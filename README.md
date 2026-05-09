@@ -1,232 +1,194 @@
-# Life Monster - 智能生活导师桌面应用
+# Life Monster — 多模态 AI 生活导师系统
+
+> 把目标拆成每天可完成的行动，用打卡、数据和 AI 建议陪你持续成长。
 
 ## 项目概述
 
-Life Monster 是一个基于国内AI技术的智能生活导师桌面应用，旨在构建一个智能化、个性化、成果导向的个人目标管理与习惯养成平台。它将传统的"我要做什么"计划模式，转变为"我今天要完成什么具体成果"的成果导向模式，通过AI提供规划、通过交互提供鼓励、通过数据提供反馈，形成完整的成长闭环。
+Life Monster 是一个基于 **CustomTkinter + Flask + MySQL/JSON + AI API** 的多模态 AI 生活导师桌面应用。它将传统的"我要做什么"计划模式，转变为"我今天要完成什么具体成果"的成果导向模式，通过 AI 提供规划、通过交互提供鼓励、通过数据提供反馈，形成完整的成长闭环。
 
-## 核心价值与理念
+## 功能模块
 
-系统旨在解决现代人普遍面临的目标模糊、拖延和难以坚持的问题，通过以下方式提供价值：
-
-- **成果导向模式**：将抽象目标转化为具体可验证的每日任务
-- **智能教练功能**：AI提供规划、交互提供鼓励、数据提供反馈
-- **完整成长闭环**：目标设定-智能规划-执行追踪-反馈优化
-
-## 核心功能模块
-
-### 1. 智能规划引擎
-- 集成国内大模型API（如百度文心千帆）
-- 基于用户目标与标签，自动生成每日具体、可验证的任务
-- 支持不同时间范围的计划生成（7天、30天等）
-
-### 2. 任务执行追踪
-- 简洁的打卡界面，记录完成状态与时间
-- 支持进度监控与历史回顾
-- 实时统计完成情况
-
-### 3. 数据可视化仪表盘
-- 直观展示累计/连续打卡天数
-- 完成率趋势图表
-- 任务类型分布饼图
-- 让成长清晰可见
-
-### 4. 情感化交互
-- AI对话助手（提供建议与鼓励）
-- 分时段励志句子推送
-- 友好的用户界面与交互体验
-
-### 5. Web API服务
-- 基于Flask框架的RESTful API
-- 支持远程数据访问和集成
-- 提供完整的任务和打卡管理接口
+| 模块 | 说明 |
+|------|------|
+| **今日成长面板** | 每日 AI 生成 3 个具体可执行任务，支持打卡完成 |
+| **数据仪表盘** | 累计/连续打卡天数、近 7 天趋势、任务类型分布 |
+| **AI 助手** | 多轮对话，支持复制、语音播放、生成任务 |
+| **智能建议** | 根据目标、任务完成率、日记内容生成个性化建议 |
+| **我的日记** | 多模态日记（文字/图片/音频/视频），支持心情标签 |
+| **个人中心** | 个人资料、目标设置、简历上传与 AI 分析 |
+| **智能规划** | 根据目标自动生成学习路线和每日任务 |
 
 ## 技术栈
 
-### 前端
-- **CustomTkinter**：现代化桌面GUI框架，支持深色/浅色主题
-- **Matplotlib**：数据可视化图表库
+- **前端**: CustomTkinter — 现代化桌面 GUI，支持主题定制
+- **后端**: Flask — RESTful Web API 服务
+- **数据库**: MySQL（主用）/ JSON 文件（降级备用）
+- **缓存**: Redis
+- **AI**: 阿里云通义千问 API（支持 mock 模式离线运行）
+- **可视化**: Matplotlib
+- **其他**: pyttsx3（语音合成）、Pillow（图片处理）
 
-### 后端
-- **Flask**：轻量级Web框架，实现RESTful API
-
-### 数据
-- **MySQL**：核心数据持久化
-- **JSON文件**：本地数据缓存
-
-### AI集成
-- 国内大模型API（如百度文心千帆）
-- 提示词工程
-
-### 工具
-- **Logging**：完善的日志系统
-- **Database Connection Pooling**：数据库连接池管理
-
-## 项目结构
+## 目录结构
 
 ```
-Life_Monster/
-├── app.py                    # 应用程序入口
-├── flask_app.py              # Flask API服务入口
-├── requirements.txt          # 项目依赖
-├── README.md                 # 项目说明文档
-├── config/                   # 配置文件目录
-│   ├── mysql_config.py       # MySQL数据库配置
-│   └── profile_data.json     # 用户配置文件
-├── data/                     # 数据文件目录
-│   ├── checkin_data.json     # 打卡数据
-│   └── daily_tasks.json      # 每日任务数据
-├── docs/                     # 文档目录
-│   └── PROJECT_STRUCTURE.md  # 项目结构说明
-├── logs/                     # 日志目录
-└── src/
-    ├── ai/                   # AI功能模块
-    │   ├── chatbot.py        # AI聊天机器人
-    │   └── planner.py        # 智能规划器
-    ├── data/                 # 数据管理模块
-    │   ├── database_config.py        # 数据库配置管理
-    │   ├── database_manager.py       # 数据库管理接口
-    │   └── mysql_database_manager.py # MySQL数据库实现
-    ├── services/             # 服务层模块
-    │   └── api_service.py    # API服务实现
-    ├── ui/                   # 用户界面模块
-    │   ├── chat_tab.py       # 聊天标签页
-    │   ├── dashboard_tab.py  # 仪表盘标签页
-    │   ├── home_tab.py       # 首页标签页
-    │   ├── main_window.py    # 主窗口
-    │   ├── plan_tab.py       # 规划标签页
-    │   ├── profile_tab.py    # 个人资料标签页
-    │   ├── suggestion_tab.py # 建议标签页
-    │   └── task_tab.py       # 任务标签页
-    └── utils/                # 工具模块
-        ├── __init__.py
-        ├── logger.py         # 日志工具
-        ├── task_manager.py   # 任务管理器
-        └── utility_functions.py # 通用工具函数
+LifeMonster/
+├── app.py                  # 统一启动入口
+├── requirements.txt        # 项目依赖
+├── .env.example            # 环境变量模板
+├── .env                    # 实际配置（已 .gitignore）
+├── .gitignore
+├── README.md               # 项目文档
+│
+├── config/                 # 配置文件
+│   ├── ai_config.py        # AI API 配置（从 .env 读取）
+│   ├── mysql_config.py     # MySQL 连接配置
+│   ├── redis_config.py     # Redis 配置
+│   └── theme.py            # 统一主题配置
+│
+├── src/
+│   ├── ui/                 # CustomTkinter 界面
+│   │   ├── login_window.py      # 登录/注册
+│   │   ├── main_window.py       # 主窗口框架
+│   │   ├── home_tab.py          # 首页/今日任务
+│   │   ├── dashboard_tab.py     # 数据仪表盘
+│   │   ├── chat_tab.py          # AI 助手
+│   │   ├── suggestion_tab.py    # 智能建议
+│   │   ├── diary_tab.py         # 我的日记
+│   │   ├── profile_tab.py       # 个人中心
+│   │   ├── settings_dialog.py   # 设置弹窗
+│   │   ├── change_password_dialog.py
+│   │   ├── theme.py             # 主题定义
+│   │   └── effects.py           # 动画特效
+│   │
+│   ├── ai/                 # AI 功能
+│   │   ├── chatbot.py           # AI 聊天机器人
+│   │   ├── task_generator.py    # 任务生成器
+│   │   └── suggestion_generator.py  # 建议生成器
+│   │
+│   ├── data/               # 数据管理
+│   │   ├── database_config.py       # 数据库工厂
+│   │   ├── json_database_manager.py # JSON 文件数据库
+│   │   ├── mysql_database_manager.py# MySQL 数据库
+│   │   └── redis_cache_manager.py   # Redis 缓存
+│   │
+│   ├── services/           # 业务服务
+│   │   ├── auth_service.py     # 认证服务
+│   │   └── tts_service.py      # 语音合成
+│   │
+│   └── utils/              # 工具
+│       ├── logger.py           # 日志
+│       └── user_state.py       # 用户状态
+│
+├── assets/                 # 静态资源
+│   └── logo/               # Logo 图标
+│
+├── data/                   # 运行时数据
+│   ├── json_db/            # JSON 数据库文件
+│   └── diary_attachments/  # 日记附件
+│
+├── docs/                   # 文档
+│   └── use_case_descriptions.md
+│
+├── logs/                   # 运行日志
+└── scripts/                # 工具脚本
+    └── seed_data.py        # 种子数据
 ```
 
-## 安装与运行
+## 环境准备
 
-### 环境要求
+### 系统要求
 - Python 3.7+
-- Windows/Linux/macOS
-- MySQL数据库
+- Windows 10/11（推荐）/ macOS / Linux
+- 可选：MySQL 8.0+、Redis 7.0+
 
-### 安装步骤
+### 1. 安装依赖
 
-1. 克隆或下载项目代码
+```bash
+pip install -r requirements.txt
+```
 
-2. 安装依赖：
-   ```bash
-   pip install -r requirements.txt
-   ```
+### 2. 配置环境变量
 
-3. 配置MySQL数据库：
-   - 确保MySQL服务已启动
-   - 创建名为`dk`的数据库
-   - 更新`config/mysql_config.py`中的数据库连接信息
+复制 `.env.example` 为 `.env`，填写真实配置：
 
-4. 运行应用：
-   ```bash
-   python app.py
-   ```
+```bash
+cp .env.example .env     # Linux / macOS
+copy .env.example .env   # Windows
+```
 
-5. 启动Flask API服务（可选）：
-   ```bash
-   python flask_app.py
-   ```
+编辑 `.env` 文件：
 
-## 使用说明
+```ini
+# AI API（可选，mock 模式无需填写）
+ALIBABA_API_KEY=your_api_key_here
+ALIBABA_MODEL=qwen-turbo
 
-### 1. 智能规划
-- 在"智能规划"标签页输入你的目标（如：学习Python编程）
-- 选择目标标签（学习、健身、工作等）
-- 设置时间范围（7天、30天等）
-- 点击"生成每日任务"按钮，系统将为你生成具体的每日任务
+# MySQL（可选，默认降级为 JSON 文件存储）
+MYSQL_HOST=127.0.0.1
+MYSQL_PORT=3306
+MYSQL_USER=root
+MYSQL_PASSWORD=your_password
+MYSQL_DATABASE=dk
 
-### 2. 任务追踪
-- 在"任务追踪"标签页查看今日任务
-- 点击复选框标记任务完成状态
-- 查看已完成任务数和连续打卡天数
+# Redis（可选）
+REDIS_HOST=127.0.0.1
+REDIS_PORT=6379
 
-### 3. 数据仪表盘
-- 在"数据仪表盘"标签页查看你的成长数据
-- 包括总打卡天数、连续打卡天数、任务完成率等统计信息
-- 查看近7天完成率趋势图和任务类型分布饼图
+# 应用模式（mock=离线模拟，live=真实 API）
+APP_MODE=mock
+```
 
-### 4. AI助手
-- 在"AI助手"标签页与智能助手进行对话
-- 询问学习建议、任务管理技巧、坚持方法等
-- 查看每日励志句子
+### 3. 启动 MySQL（可选）
 
-### 5. API服务
-- 启动Flask API服务后，可通过以下端点访问：
-  - `GET /health` - 健康检查
-  - `GET /api/tasks` - 获取任务列表
-  - `POST /api/tasks` - 创建新任务
-  - `PUT /api/tasks/{id}` - 更新任务
-  - `DELETE /api/tasks/{id}` - 删除任务
-  - `GET /api/checkins` - 获取打卡记录
-  - `POST /api/checkins` - 记录打卡
-  - `GET /api/stats` - 获取统计信息
+```bash
+# 创建数据库
+mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS dk DEFAULT CHARACTER SET utf8mb4;"
+```
 
-## 功能演示
+### 4. 启动 Redis（可选）
 
-### 智能规划
-- 输入目标：学习Python编程
-- 选择标签：学习
-- 设置时间：7天
-- 生成每日具体任务，如"完成10道Python列表操作练习题"、"阅读《Python核心编程》第3章"等
+```bash
+redis-server
+```
 
-### 任务追踪
-- 查看今日任务列表
-- 完成任务后点击复选框打卡
-- 系统记录完成时间并更新统计信息
+### 5. 运行项目
 
-### 数据仪表盘
-- 直观展示各项统计数据
-- 通过图表可视化你的成长趋势
-- 了解任务类型分布情况
+```bash
+python app.py
+```
 
-### AI助手
-- 提供个性化学习建议
-- 回答关于目标达成的问题
-- 提供持续的鼓励和支持
+**无需 MySQL 和 Redis**，系统会自动降级为 JSON 文件数据库和缓存，离线也可运行。
 
-### API服务
-- 支持第三方应用集成
-- 提供完整的CRUD操作
-- 实时数据同步
+## 常见问题
 
-## 开发计划
+### MySQL 连接失败
+- 系统会自动降级为 JSON 文件数据库，无需处理即可运行
+- 如需使用 MySQL，检查 `.env` 中的数据库配置
 
-### 近期计划
-1. 集成实际的国内大模型API
-2. 优化数据库查询性能
-3. 增强API服务的安全性
-4. 添加更多数据可视化图表
+### Redis 不可用
+- 缓存不可用不影响核心功能，系统会自动跳过缓存
 
-### 长期计划
-1. 添加更多任务类型和标签
-2. 实现多用户支持
-3. 添加数据导出功能
-4. 支持移动端访问
-5. 增强AI个性化推荐能力
+### AI API 调用失败
+- 设置 `APP_MODE=mock` 可使用本地规则生成任务和建议，无需 API Key
+- 如需使用 AI，在 `.env` 中填写 `ALIBABA_API_KEY`
 
-## 贡献
+### 登录问题
+- 首次使用点击"注册"创建账号
+- 也可点击"游客模式体验"直接进入
 
-欢迎对项目提出建议和贡献代码！如果你有任何想法或发现了问题，请提交Issue或Pull Request。
+## 项目截图
 
-## 许可证
+截图位置：`docs/` 目录
 
-本项目采用MIT许可证，详情请查看LICENSE文件。
+## 后续优化方向
 
-## 联系方式
-
-如有任何问题或建议，请通过以下方式联系：
-
-- 项目地址：[GitHub Repository]
-- 电子邮件：[your-email@example.com]
+- [ ] 任务完成后 AI 自动复盘
+- [ ] 成长报告导出（Markdown / PDF）
+- [ ] 简历能力画像与技能分析
+- [ ] 情绪陪伴与心情分析
+- [ ] 多语言支持
+- [ ] 打包为单文件 exe
 
 ---
 
-**Life Monster - 让成长更智能，让坚持更简单！**
+**Life Monster — 让成长更智能，让坚持更简单！**
