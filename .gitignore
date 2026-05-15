@@ -20,6 +20,14 @@ wheels/
 .installed.cfg
 *.egg
 
+# Virtual environment
+.venv
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
 # IDE
 .vscode/
 .idea/
@@ -36,35 +44,48 @@ wheels/
 ehthumbs.db
 Thumbs.db
 
-# Project specific
+# Project specific — runtime data
+logs/
 *.log
 *.db-shm
 *.db-wal
-logs/
 backups/
+data/json_db/
+data/diary_attachments/
 
 # Database
-study_master.db
 *.sqlite
 *.sqlite3
+*.db
+mysql_data/
 
 # Environment
 .env
-.venv
-env/
-venv/
-ENV/
-env.bak/
-venv.bak/
 
-# Configuration
+# Configuration (user-specific)
 config/local_settings.py
 config/secrets.py
-config/ai_config.py
-config/mysql_config.py
 
 # Agent scratch files
 .scratch/
+
+# Claude AI personal config
+.claude/
+.agents/
+
+# User runtime data in config/
+config/avatars/
+config/suggestions_*.json
+config/roadmap_*.json
+config/profile_data.json
+config/resume_data.json
+config/secret_key.txt
+
+# Saved credentials
+src/data/.saved_credentials.json
+
+# Claude skills lock
+skills-lock.json
 
 # Testing
 .coverage
@@ -72,9 +93,5 @@ config/mysql_config.py
 .tox/
 htmlcov/
 
-# MySQL
-mysql_data/
-# Environment
-.env
-*.pyc
-__pycache__/
+# Redis installer (download artifact)
+redis.msi

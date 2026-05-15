@@ -1,6 +1,7 @@
 import customtkinter as ctk
 import sys
 import os
+import threading
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
@@ -8,11 +9,29 @@ from src.ui.main_window import MainWindow
 from src.ui.login_window import LoginWindow
 from src.utils.logger import get_logger
 
+
+def _start_flask_backend():
+    """在后台线程中启动 Flask 服务器"""
+    try:
+        from backend import create_app
+        app = create_app()
+        app.run(host="127.0.0.1", port=5000, debug=False, use_reloader=False, threaded=True)
+    except Exception as e:
+        try:
+            logger = get_logger()
+            logger.error(f"Flask 后端启动失败: {e}")
+        except Exception:
+            pass
+
 class LifeMonsterApp:
     def __init__(self):
         self.logger = get_logger()
         self.logger.info("启动 LifeMonster 应用")
-        
+
+        # 后台启动 Flask 服务器
+        threading.Thread(target=_start_flask_backend, daemon=True).start()
+        self.logger.info("Flask 后端线程已启动")
+
         ctk.set_appearance_mode("light")
         ctk.set_default_color_theme("blue")
         
