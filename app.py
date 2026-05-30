@@ -1,149 +1,104 @@
-import customtkinter as ctk
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""LifeMonster 桌面应用入口 — CustomTkinter + 后台 Flask API"""
 import sys
 import os
 import threading
+import time
+import requests
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from src.ui.main_window import MainWindow
+import customtkinter as ctk
 from src.ui.login_window import LoginWindow
+from src.ui.main_window import MainWindow
+from src.data.database_config import get_database_manager
+from src.services.auth_service import auth_manager
 from src.utils.logger import get_logger
 
 
-def _start_flask_backend():
-    """在后台线程中启动 Flask 服务器"""
-    try:
-        from backend import create_app
-        app = create_app()
-        app.run(host="127.0.0.1", port=5000, debug=False, use_reloader=False, threaded=True)
-    except Exception as e:
+FLASK_URL = "http://127.0.0.1:5000"
+
+
+def start_flask():
+    """在后台线程中启动 Flask API 服务器"""
+    from flask_api import app
+    app.run(host="127.0.0.1", port=5000, debug=False, use_reloader=False)
+
+
+def wait_for_flask(timeout=10):
+    """等待 Flask 服务就绪"""
+    start = time.time()
+    while time.time() - start < timeout:
         try:
-            logger = get_logger()
-            logger.error(f"Flask 后端启动失败: {e}")
+            resp = requests.get(f"{FLASK_URL}/api/health", timeout=2)
+            if resp.status_code == 200:
+                return True
         except Exception:
             pass
+        time.sleep(0.3)
+    return False
 
-class LifeMonsterApp:
-    def __init__(self):
-        self.logger = get_logger()
-        self.logger.info("启动 LifeMonster 应用")
 
-        # 后台启动 Flask 服务器
-        threading.Thread(target=_start_flask_backend, daemon=True).start()
-        self.logger.info("Flask 后端线程已启动")
+def main():
+    logger = get_logger()
+    logger.info("LifeMonster 启动中...")
 
-        ctk.set_appearance_mode("light")
-        ctk.set_default_color_theme("blue")
-        
-        self.root = ctk.CTk()
-        self.root.title("LifeMonster - 生活导师")
-        
-        try:
-            logo_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets", "logo", "logo.png")
-            if os.path.exists(logo_path):
-                from PIL import Image, ImageTk
-                logo_image = Image.open(logo_path)
-                logo_image = logo_image.resize((256, 256), Image.Resampling.LANCZOS)
-                self.icon_photo = ImageTk.PhotoImage(logo_image)
-                self.root.iconphoto(True, self.icon_photo)
-        except Exception as e:
-            self.logger.warning(f"设置应用图标失败: {e}")
-        
-        self.show_login()
+    # 初始化数据库
+    get_database_manager()
+    logger.info("数据库初始化完成")
+
+    # 后台启动 Flask
     
-    def center_window(self, width, height):
-        screen_width = self.root.winfo_screenwidth()
-        screen_height = self.root.winfo_screenheight()
-        x = (screen_width // 2) - (width // 2)
-        y = (screen_height // 2) - (height // 2)
-        self.root.geometry(f'{width}x{height}+{x}+{y}')
-        self.logger.info(f"屏幕尺寸: {screen_width}x{screen_height}, 窗口位置: {x},{y}")
     
-    def show_login(self):
-        self.login_window = LoginWindow(self.root, on_login_success=self.on_login)
-    
-    def on_login(self, user_info):
-        username = user_info.get('username', '未知用户')
-        self.logger.info(f"用户登录成功: {username}")
-        
-        for widget in self.root.winfo_children():
+    flask_thread = threading.Thread(target=start_flask, daemon=True)
+    flask_thread.start()
+    logger.info("Flask API 后台线程已启动")
+
+    # 等待 Flask 就绪
+    if not wait_for_flask():
+        logger.warning("Flask API 启动超时，部分功能可能不可用")
+
+    # 启动 CustomTkinter 桌面界面
+    ctk.set_appearance_mode("light")
+    ctk.set_default_color_theme("green")
+
+    root = ctk.CTk()
+    root.title("LifeMonster - 生活导师")
+
+    # 窗口尺寸
+    sw = root.winfo_screenwidth()
+    sh = root.winfo_screenheight()
+    w, h = 1400, 900
+    x = (sw - w) // 2
+    y = (sh - h) // 2
+    root.geometry(f"{w}x{h}+{x}+{y}")
+    root.minsize(1200, 760)
+
+    # 登录成功回调：同步 auth 状态，销毁登录窗口，创建主窗口
+    def on_login_success(user):
+        auth_manager.login(user)
+        for widget in root.winfo_children():
             widget.destroy()
-        
-        self.root.title("LifeMonster - 生活导师")
-        
-        # 自适应分辨率设置
-        screen_width = self.root.winfo_screenwidth()
-        screen_height = self.root.winfo_screenheight()
-        
-        # 根据屏幕分辨率设置窗口大小
-        if screen_width >= 1600:
-            window_width, window_height = 1500, 900
-        elif screen_width >= 1440:
-            window_width, window_height = 1400, 900
-        else:
-            window_width, window_height = 1200, 800
-        
-        self.root.geometry(f"{window_width}x{window_height}")
-        self.root.minsize(1100, 700)  # 最小尺寸稍微减小以适应小屏幕
-        self.root.resizable(True, True)
-        self.center_window(window_width, window_height)
+        MainWindow(root, on_logout=show_login)
 
-        self.main_window = MainWindow(self.root, on_logout=self.show_login)
-    
-    def run(self):
-        self.logger.info("应用主循环启动")
-        self.root.mainloop()
+    # 登出回调：返回登录界面
+    def show_login():
+        for widget in root.winfo_children():
+            widget.destroy()
+        LoginWindow(root, on_login_success=on_login_success)
+
+    # 显示登录窗口
+    LoginWindow(root, on_login_success=on_login_success)
+
+    try:
+        root.mainloop()
+    except KeyboardInterrupt:
+        logger.info("用户中断，应用退出")
+    except Exception as e:
+        logger.error(f"应用异常退出: {e}")
+        raise
+
 
 if __name__ == "__main__":
-    try:
-        app = LifeMonsterApp()
-        print("应用启动成功，开始运行...")
-        app.run()
-    except KeyboardInterrupt:
-        print("应用被用户中断")
-    except ImportError as e:
-        print(f"依赖包缺失: {e}")
-        print("请检查 requirements.txt 并安装缺失的包")
-    except Exception as e:
-        print(f"应用启动失败: {e}")
-        import traceback
-        traceback.print_exc()
-        
-        # 尝试降级启动
-        print("\n尝试降级启动...")
-        try:
-            import customtkinter as ctk
-            root = ctk.CTk()
-            root.title("LifeMonster - 紧急模式")
-            root.geometry("400x200")
-            
-            error_frame = ctk.CTkFrame(root, fg_color="#F7F3EA")
-            error_frame.pack(fill="both", expand=True, padx=20, pady=20)
-            
-            ctk.CTkLabel(error_frame, text="⚠️ 系统启动异常", 
-                        font=("Microsoft YaHei", 18, "bold"),
-                        text_color="#2F4638").pack(pady=10)
-            
-            ctk.CTkLabel(error_frame, text="应用程序遇到问题，但已进入安全模式",
-                        font=("Microsoft YaHei", 12),
-                        text_color="#7A8A80", wraplength=350).pack(pady=5)
-            
-            ctk.CTkLabel(error_frame, text=f"错误信息: {str(e)[:100]}...",
-                        font=("Microsoft YaHei", 10),
-                        text_color="#9BA89E").pack(pady=5)
-            
-            def open_manual_mode():
-                try:
-                    from src.ui.login_window import LoginWindow
-                    for widget in root.winfo_children():
-                        widget.destroy()
-                    LoginWindow(root, lambda x: None)
-                except:
-                    messagebox.showerror("错误", "无法进入手动模式")
-            
-            ctk.CTkButton(error_frame, text="尝试手动启动",
-                         command=open_manual_mode).pack(pady=10)
-            
-            root.mainloop()
-        except Exception as fallback_error:
-            print(f"降级启动也失败: {fallback_error}")
+    main()
